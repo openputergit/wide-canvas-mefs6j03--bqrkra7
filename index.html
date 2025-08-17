@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Malware Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .neu-brutal {
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0px #000;
+            transition: all 0.2s ease;
+        }
+        .neu-brutal:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #000;
+        }
+        body {
+            background-color: #f0f7ff;
+        }
+        .chart-container {
+            border: 3px solid #000;
+            background: white;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8 neu-brutal bg-yellow-300 p-4 inline-block">AI Malware Detection System 🔍</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- File Upload Section -->
+            <div class="neu-brutal bg-green-200 p-6">
+                <h2 class="text-2xl font-bold mb-4">File Metadata Input</h2>
+                <input type="file" id="fileInput" class="mb-4 neu-brutal bg-white p-2">
+                <button onclick="analyzeFile()" class="neu-brutal bg-blue-400 px-6 py-2 font-bold">Analyze File</button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="neu-brutal bg-pink-200 p-6">
+                <h2 class="text-2xl font-bold mb-4">Analysis Results</h2>
+                <div id="resultBox" class="neu-brutal bg-white p-4 mb-4 min-h-[100px]">
+                    No file analyzed yet
+                </div>
+                <div id="probabilityMeter" class="w-full h-4 neu-brutal bg-gray-200"></div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div class="neu-brutal bg-white p-4">
+                <h3 class="text-xl font-bold mb-4">Distribution Chart</h3>
+                <canvas id="distributionChart"></canvas>
+            </div>
+            <div class="neu-brutal bg-white p-4">
+                <h3 class="text-xl font-bold mb-4">Feature Importance</h3>
+                <canvas id="featureChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="mt-6 neu-brutal bg-purple-200 p-6">
+            <h2 class="text-2xl font-bold mb-4">Export Results</h2>
+            <button onclick="exportResults()" class="neu-brutal bg-orange-300 px-6 py-2 font-bold">
+                Export to CSV <i class="bi bi-download"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Simulated ML model response
+        function analyzeFile() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            // Simulate analysis delay
+            const resultBox = document.getElementById('resultBox');
+            resultBox.innerHTML = 'Analyzing...';
+            
+            setTimeout(() => {
+                const probability = Math.random();
+                let result, color;
+                
+                if (probability < 0.3) {
+                    result = "Safe File ✅";
+                    color = "bg-green-400";
+                } else if (probability < 0.7) {
+                    result = "Suspicious – Needs Review ⚠️";
+                    color = "bg-yellow-400";
+                } else {
+                    result = "Malware Detected 🚨";
+                    color = "bg-red-400";
+                }
+
+                resultBox.innerHTML = `
+                    <div class="text-xl font-bold ${color} p-2 neu-brutal">
+                        ${result}
+                    </div>
+                    <div class="mt-4">
+                        Confidence: ${(probability * 100).toFixed(2)}%
+                    </div>
+                `;
+
+                // Update probability meter
+                const meter = document.getElementById('probabilityMeter');
+                meter.style.background = `linear-gradient(to right, #4ade80 0%, #facc15 50%, #f87171 100%)`;
+                meter.style.position = 'relative';
+                meter.innerHTML = `<div class="absolute h-full w-1 bg-black" style="left: ${probability * 100}%"></div>`;
+
+                updateCharts();
+            }, 1500);
+        }
+
+        function updateCharts() {
+            // Distribution Chart
+            new Chart(document.getElementById('distributionChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Safe', 'Suspicious', 'Malware'],
+                    datasets: [{
+                        data: [45, 30, 25],
+                        backgroundColor: ['#4ade80', '#facc15', '#f87171']
+                    }]
+                }
+            });
+
+            // Feature Importance Chart
+            new Chart(document.getElementById('featureChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['API Calls', 'Entropy', 'File Size', 'Opcodes', 'Imports'],
+                    datasets: [{
+                        label: 'Importance Score',
+                        data: [0.8, 0.7, 0.5, 0.6, 0.4],
+                        backgroundColor: '#93c5fd'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportResults() {
+            const csvContent = "data:text/csv;charset=utf-8,Timestamp,File,Result,Probability\n" +
+                             `${new Date().toISOString()},test.exe,Safe,0.25`;
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "malware_analysis_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize charts on load
+        document.addEventListener('DOMContentLoaded', updateCharts);
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
